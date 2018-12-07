@@ -1,17 +1,15 @@
-const readChunk = require('read-chunk'); // npm install read-chunk
+const readChunk = require('read-chunk');
 const imageType = require('image-type');
-const fs = require('fs');
 const path = require('path');
-
+const fsp = require('fs').promises;
 
 function getCorrectType(fp) {
   const buffer = readChunk.sync(fp, 0, 12);
 
   if (imageType(buffer) === null) {
     return null;
-  } else {
-    return imageType(buffer).ext;
   }
+  return imageType(buffer).ext;
 }
 
 function getCurrentType(fp) {
@@ -22,16 +20,15 @@ function imageCorrect(fp) {
   return getCurrentType(fp) === getCorrectType(fp);
 }
 
-function correctImageType(fp) {
+async function correctImageType(fp) {
   if (!imageCorrect(fp) && ['png', 'jpg', 'jpeg'].includes(getCorrectType(fp))) {
-    const newFp = fp.substr(0, fp.lastIndexOf('.') + 1) + getCorrectType(fp)
-    fs.rename(fp, newFp, (err) => {
-      if (err) throw err;
+    const newFp = fp.substr(0, fp.lastIndexOf('.') + 1) + getCorrectType(fp);
+    try {
+      await fsp.rename(fp, newFp);
       console.log(`Success: ${path.basename(fp)} -> ${path.basename(newFp)}`);
-    });
-    return 1;
-  } else {
-    return 0;
+    } catch (err) {
+      console.warn(`Error handling file: ${path.basename(fp)}`);
+    }
   }
 }
 

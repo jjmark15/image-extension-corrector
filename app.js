@@ -1,31 +1,28 @@
 #! node
+const path = require('path');
+const fsp = require('fs').promises;
 const correctImageType = require('./image_correct');
-const path = require('path')
-const fs = require('fs')
 
-function performBatchCorrection(dirPath) {
-  let count = 0;
-  fs.readdir(dirPath, (err, files) => {
-    files.forEach(file => {
-      correctImageType(path.resolve(path.join(dirPath, file)));
-      count += 1
-    });
-  })
-  return count;
+async function performBatchCorrection(dirPath) {
+  return fsp.readdir(dirPath).then((files) => {
+    return Promise.all(files.map((file) => {
+      return correctImageType(path.resolve(path.join(dirPath, file)));
+    }));
+  });
 }
 
-function parseArgs() {
-  let count = 0;
-  process.argv.slice(2).forEach(function (val, index, array) {
-    fs.stat(val, (err, stats) => {
+async function parseArgs() {
+  await Promise.all(process.argv.slice(2).map((val) => {
+    return fsp.stat(val).then((stats) => {
       if (stats.isFile()) {
-        count += correctImageType(val);
-      } else if (stats.isDirectory()) {
-        count += performBatchCorrection(val);
+        return correctImageType(val);
       }
-    })
-  });
-  return count;
+      if (stats.isDirectory()) {
+        return performBatchCorrection(val);
+      }
+      return Promise.resolve();
+    });
+  }));
 }
 
 parseArgs();
