@@ -21,6 +21,12 @@ async function parseArgs() {
         return performBatchCorrection(val);
       }
       return Promise.resolve();
+    }).catch((err) => {
+      if (err.code === 'ENOENT') {
+        console.warn(`Error: path does not exist: ${err.path}`);
+      } else {
+        throw err;
+      }
     });
   }));
 }

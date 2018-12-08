@@ -10,7 +10,8 @@
       "name": "Launch Program",
       "program": "${workspaceFolder}/app.js",
       "args": [
-        "./temp"
+        "./temp/images",
+        "./temp/images/notthere.jpg"
       ]
     }
   ]

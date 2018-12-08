@@ -1,6 +1,9 @@
 # temp stuff
 temp/*
 !temp/.gitkeep
+!temp/images/
+temp/images/*
+!temp/images/.gitkeep
 
 # Logs
 logs
